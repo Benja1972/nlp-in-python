@@ -82,9 +82,34 @@ def clean_round(text):
     text = re.sub(' +', ' ', text) 
     return text   
 
+
 cln = lambda x: clean_round(x)
 
+# 1 -- Clean
 data_clean = pd.DataFrame(data.text.apply(cln))
+
+from nltk.corpus import stopwords
+from pymystem3 import Mystem
+from string import punctuation
+
+#Create lemmatizer and stopwords list
+mystem = Mystem() 
+russian_stopwords = stopwords.words("russian")
+
+def preprocess_text(text):
+    tokens = mystem.lemmatize(text.lower())
+    tokens = [token for token in tokens if token not in russian_stopwords\
+              and token != " " \
+              and token.strip() not in punctuation]
+    
+    text = " ".join(tokens)
+    
+    return text
+
+prepro = lambda x: preprocess_text(x)
+
+# 2 -- Lemmatization
+data_clean = pd.DataFrame(data_clean.text.apply(prepro))
 
 data_clean['full_name'] = full_names
 data_clean.to_pickle(join(DATA,"clean.pkl"))
@@ -92,10 +117,9 @@ data_clean.to_pickle(join(DATA,"clean.pkl"))
 
 ## Document-Term Matrix
 from sklearn.feature_extraction.text import CountVectorizer
-from nltk.corpus import stopwords
-stopwords_russian = set(stopwords.words("russian"))
 
-cv = CountVectorizer(stop_words=stopwords_russian)
+
+cv = CountVectorizer(stop_words=russian_stopwords)
 data_cv = cv.fit_transform(data_clean.text)
 
 data_dtm = pd.DataFrame(data_cv.toarray(), columns=cv.get_feature_names())

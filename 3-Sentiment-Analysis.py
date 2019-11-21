@@ -33,6 +33,8 @@ plt.figure()
 y_pos =  list(data.full_name)
 plt.barh(y_pos, data.polarity, align='center')
 plt.yticks(y_pos, data.full_name)
+plt.title('Sentiment Analysis', fontsize=20)
+plt.xlabel('<-- Negative -------- Positive -->', fontsize=15)
 
 
 
